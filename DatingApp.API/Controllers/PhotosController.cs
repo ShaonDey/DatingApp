@@ -145,5 +145,60 @@ namespace DatingApp.API.Controllers
             }
         }
 
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeletePhoto(int userId, int id)
+        {
+            if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+            {
+                return Unauthorized();
+            }
+            else
+            {
+                var userFromRepo = await _repo.GetUser(userId);
+
+                if (!userFromRepo.Photos.Any(p => p.Id.Equals(id)))
+                {
+                    return Unauthorized();
+                }
+                else
+                {
+                    var photoFromRepo = await _repo.GetPhoto(id);
+
+                    if (photoFromRepo.IsMain)
+                    {
+                        return BadRequest("You can not delete your main photo!");
+                    }
+                    else
+                    {
+                        // if (!string.IsNullOrWhiteSpace(photoFromRepo.PublicId))
+                        if (photoFromRepo.PublicId != null)
+                        {
+                            var deletionParams = new DeletionParams(photoFromRepo.PublicId);
+                        
+                            var result = _cloudinary.Destroy(deletionParams);
+
+                            if (result.Result == "ok")
+                            {
+                                _repo.Delete(photoFromRepo);
+                            }
+                        }
+                        else
+                        {
+                            _repo.Delete(photoFromRepo);
+                        }
+
+                        if (await _repo.SaveAll())
+                        {
+                            return Ok();
+                        }
+                        else
+                        {
+                            return BadRequest("Failed to delete photo");
+                        }
+                    }
+                }
+            }
+        }
+
     }
 }
