@@ -18,7 +18,7 @@ namespace DatingApp.API.Helpers
         {
             var paginationHeader = new PaginationHeader(currentPage, itemsPerPage, totalItems, totalPages);
 
-            var camelCaseFormatter = new JsonSerializerSettings() 
+            var camelCaseFormatter = new JsonSerializerSettings
             {
                 ContractResolver = new CamelCasePropertyNamesContractResolver()
             };
