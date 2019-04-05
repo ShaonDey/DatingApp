@@ -162,5 +162,32 @@ namespace DatingApp.API.Controllers
                 }
             }
         }
+
+        [HttpPost("{id}/read")]
+        public async Task<IActionResult> MarkMessageAsRead(int userId, int id)
+        {
+            if (userId != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value))
+            {
+                return Unauthorized();
+            }
+            else
+            {
+                var messageFromRepo = await _repo.GetMessage(id);
+
+                if (messageFromRepo.RecipientId != userId)
+                {
+                    return Unauthorized();
+                }
+                else
+                {
+                    messageFromRepo.IsRead = true;
+                    messageFromRepo.DateRead = DateTime.Now;
+
+                    await _repo.SaveAll();
+                    
+                    return NoContent();
+                }
+            }
+        }
     }
 }
