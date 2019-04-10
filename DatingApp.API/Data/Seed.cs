@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections.Generic;
 using DatingApp.API.Models;
 using Newtonsoft.Json;
